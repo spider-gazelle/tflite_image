@@ -19,8 +19,8 @@ dependencies:
     github: spider-gazelle/stumpy_resize
 
 development_dependencies:
-  ameba:
-    github: veelenga/ameba
+  #ameba:
+  #  github: veelenga/ameba
 
   # used for specs
   stumpy_png:

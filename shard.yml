@@ -1,0 +1,37 @@
+name: tflite_image
+version: 1.0.0
+
+dependencies:
+  # the model interpreter
+  tensorflow_lite:
+    github: spider-gazelle/tensorflow_lite
+
+  # pixel representation
+  stumpy_core:
+    github: stumpycr/stumpy_core
+
+  # drawing bounding boxes
+  stumpy_utils:
+    github: stumpycr/stumpy_utils
+
+  # resize the images to model requirements
+  stumpy_resize:
+    github: spider-gazelle/stumpy_resize
+
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
+
+  # used for specs
+  stumpy_png:
+    github: stumpycr/stumpy_png
+    branch: master
+
+  stumpy_jpeg:
+    github: stumpycr/stumpy_jpeg
+    branch: master
+
+authors:
+  - Stephen von Takach <steve@place.tech>
+
+license: MIT

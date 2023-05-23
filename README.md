@@ -43,16 +43,16 @@ Object detection
 require "tflite_image"
 
 # init the tensorflow client with your object detection model
-client = TensorflowLite::Client.new("./models/classifier.tflite")
+client = TensorflowLite::Client.new("./models/detector.tflite")
 
 # init the detector
-classifier = TensorflowLite::Image::ObjectDetection.new(client, scale_mode: :cover)
+detector = TensorflowLite::Image::ObjectDetection.new(client, scale_mode: :cover)
 
 # load your image
 canvas = StumpyJPEG.read("./some_image.jpg")
 
 # run the model, outputs the scaled image that was run through the model
-scaled_canvas, detections = classifier.run canvas
+scaled_canvas, detections = detector.run canvas
 
 # parse the outputs
 puts detections.inspect
@@ -66,6 +66,37 @@ puts detections.inspect
 offsets = detector.detection_adjustments(canvas)
 detector.markup canvas, detections, *offsets
 StumpyPNG.write(canvas, "./bin/detection_output.png")
+```
+
+Pose detection
+
+```crystal
+require "tflite_image"
+
+# init the tensorflow client with your object detection model
+client = TensorflowLite::Client.new("./models/pose.tflite")
+
+# init the detector
+pose = TensorflowLite::Image::PoseEstimation.new(client)
+
+# load your image
+canvas = StumpyJPEG.read("./person_image.jpg")
+
+# run the model, outputs the scaled image that was run through the model
+scaled_canvas, detections = pose.run canvas
+
+# parse the outputs
+puts detections.inspect
+
+# markup the image with a skeleton and save the output:
+# ========================================================
+
+# we need to apply offsets to the detections
+# as they apply to the scaled_canvas
+# so they need adjustment to be mapped back onto the original image
+offsets = pose.detection_adjustments(canvas)
+pose.markup canvas, detections, *offsets
+StumpyPNG.write(canvas, "./bin/pose_output.png")
 ```
 
 ## Contributing

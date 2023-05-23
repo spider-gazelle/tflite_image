@@ -20,43 +20,45 @@ unless File.exists? SPEC_DETECT_MODEL
   end
 end
 
-describe TensorflowLite::Image::ObjectDetection do
-  client = TensorflowLite::Client.new(SPEC_DETECT_MODEL)
-  detector = TensorflowLite::Image::ObjectDetection.new(client)
+module TensorflowLite::Image
+  describe ObjectDetection do
+    client = TensorflowLite::Client.new(SPEC_DETECT_MODEL)
+    detector = ObjectDetection.new(client)
 
-  it "detects objects in an using fit image" do
-    puts client.interpreter.inspect
-    puts "input resolution: #{detector.resolution.join("x")}px"
+    it "detects objects in an using fit image" do
+      puts client.interpreter.inspect
+      puts "input resolution: #{detector.resolution.join("x")}px"
 
-    canvas = StumpyJPEG.read(SPEC_DETECT_IMAGE.expand.to_s)
-    scaled_canvas, detections = detector.run canvas
-    puts detections.inspect
+      canvas = StumpyJPEG.read(SPEC_DETECT_IMAGE.expand.to_s)
+      scaled_canvas, detections = detector.run canvas
+      puts detections.inspect
 
-    detector.markup scaled_canvas, detections
-    StumpyPNG.write(scaled_canvas, "./bin/detection_fit_scaled_output.png")
+      detector.markup scaled_canvas, detections
+      StumpyPNG.write(scaled_canvas, "./bin/detection_fit_scaled_output.png")
 
-    offsets = detector.detection_adjustments(canvas)
-    detector.markup canvas, detections, *offsets
-    StumpyPNG.write(canvas, "./bin/detection_fit_original_output.png")
+      offsets = detector.detection_adjustments(canvas)
+      detector.markup canvas, detections, *offsets
+      StumpyPNG.write(canvas, "./bin/detection_fit_original_output.png")
 
-    detections[0].name.should eq "dining table"
-  end
+      detections[0].name.should eq "dining table"
+    end
 
-  it "detects objects in an using cover image" do
-    puts client.interpreter.inspect
-    puts "input resolution: #{detector.resolution.join("x")}px"
+    it "detects objects in an using cover image" do
+      puts client.interpreter.inspect
+      puts "input resolution: #{detector.resolution.join("x")}px"
 
-    canvas = StumpyJPEG.read(SPEC_DETECT_IMAGE.expand.to_s)
-    scaled_canvas, detections = detector.run canvas, scale_mode: :cover
-    puts detections.inspect
+      canvas = StumpyJPEG.read(SPEC_DETECT_IMAGE.expand.to_s)
+      scaled_canvas, detections = detector.run canvas, scale_mode: :cover
+      puts detections.inspect
 
-    detector.markup scaled_canvas, detections
-    StumpyPNG.write(scaled_canvas, "./bin/detection_cover_scaled_output.png")
+      detector.markup scaled_canvas, detections
+      StumpyPNG.write(scaled_canvas, "./bin/detection_cover_scaled_output.png")
 
-    offsets = detector.detection_adjustments(canvas, scale_mode: :cover)
-    detector.markup canvas, detections, *offsets
-    StumpyPNG.write(canvas, "./bin/detection_cover_original_output.png")
+      offsets = detector.detection_adjustments(canvas, scale_mode: :cover)
+      detector.markup canvas, detections, *offsets
+      StumpyPNG.write(canvas, "./bin/detection_cover_original_output.png")
 
-    detections[0].name.should eq "potted plant"
+      detections[0].name.should eq "potted plant"
+    end
   end
 end

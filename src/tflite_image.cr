@@ -2,7 +2,7 @@ require "json"
 require "stumpy_core"
 require "stumpy_resize"
 
-class TensorflowLite::Image
+module TensorflowLite::Image
   enum Format
     Float
     Quantized
@@ -67,7 +67,7 @@ class TensorflowLite::Image
     end
 
     # scales the image before invoking the tflite model
-    def run(canvas : Canvas, scale_mode : Scale = @scaling_mode, resize_method : StumpyResize::InterpolationMethod = StumpyResize::DEFAULT_INTERPOLATION_METHOD)
+    def run(canvas : Canvas, scale_mode : Scale = @scaling_mode, resize_method : StumpyResize::InterpolationMethod = :bilinear)
       desired_width, desired_height = resolution
       scaled = case scale_mode
                in .fit?
@@ -76,6 +76,20 @@ class TensorflowLite::Image
                  StumpyResize.scale_to_cover(canvas, desired_width, desired_height, resize_method)
                end
       process scaled
+    end
+
+    # provide the original image or an image in the same aspect ratio as the original image
+    #
+    # this will calculate the adjustments required to the detections for
+    # overlaying on the original image.
+    def detection_adjustments(image : Canvas, scale_mode : Scale = @scaling_mode)
+      target_width, target_height = resolution
+      case scale_mode
+      in .fit?
+        Image.calculate_boxing_offset(image.width, image.height, target_width, target_height)
+      in .cover?
+        Image.calculate_cropping_offset(image.width, image.height, target_width, target_height)
+      end
     end
 
     # converts a layers outputs to Float32 for simplified processing

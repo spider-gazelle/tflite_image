@@ -17,7 +17,7 @@ module TensorflowLite::Image
   DEFAULT_SCALE_MODE = Scale::Fit
 
   module Common
-    def initialize(client : Client, labels : Hash(Int32, String)? = nil, @scaling_mode : Scale = DEFAULT_SCALE_MODE, input_format : Format? = nil, output_format : Format? = nil)
+    def initialize(client : Client, labels : Array(String)? = nil, @scaling_mode : Scale = DEFAULT_SCALE_MODE, input_format : Format? = nil, output_format : Format? = nil)
       @client = client
 
       # determine format (uint8, int8, float32)
@@ -41,7 +41,7 @@ module TensorflowLite::Image
       @labels = if labels
                   labels
                 else
-                  @labels = client.labels || {} of Int32 => String
+                  @labels = client.labels || [] of String
                 end
     end
 
@@ -52,7 +52,7 @@ module TensorflowLite::Image
     property scaling_mode : Scale
 
     # the labels extracted from the model or provided in the initializer
-    getter labels : Hash(Int32, String)
+    getter labels : Array(String)
 
     # the detected tensor format (can be set manually, but not recommended)
     getter input_format : Format
@@ -60,15 +60,16 @@ module TensorflowLite::Image
     # the tensorflow lite client
     getter client : Client
 
-    # returns width x height that the models requires
+    # returns height x width that the models requires
     getter resolution : Tuple(Int32, Int32) do
       input_tensor = client[0]
+      # height, width
       {input_tensor[1], input_tensor[2]}
     end
 
     # scales the image before invoking the tflite model
     def run(canvas : Canvas, scale_mode : Scale = @scaling_mode, resize_method : StumpyResize::InterpolationMethod = :bilinear)
-      desired_width, desired_height = resolution
+      desired_height, desired_width = resolution
       scaled = case scale_mode
                in .fit?
                  StumpyResize.scale_to_fit(canvas, desired_width, desired_height, resize_method)
@@ -78,17 +79,20 @@ module TensorflowLite::Image
       process scaled
     end
 
-    # provide the original image or an image in the same aspect ratio as the original image
-    #
     # this will calculate the adjustments required to the detections for
-    # overlaying on the original image.
+    # overlaying on the original image (or a scaled image in the same aspect ratio)
     def detection_adjustments(image : Canvas, scale_mode : Scale = @scaling_mode)
-      target_width, target_height = resolution
+      detection_adjustments(image.width, image.height, scale_mode)
+    end
+
+    # :ditto:
+    def detection_adjustments(image_width : Int32, image_height : Int32, scale_mode : Scale = @scaling_mode)
+      target_height, target_width = resolution
       case scale_mode
       in .fit?
-        Image.calculate_boxing_offset(image.width, image.height, target_width, target_height)
+        Image.calculate_boxing_offset(image_width, image_height, target_width, target_height)
       in .cover?
-        Image.calculate_cropping_offset(image.width, image.height, target_width, target_height)
+        Image.calculate_cropping_offset(image_width, image_height, target_width, target_height)
       end
     end
 

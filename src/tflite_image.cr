@@ -63,13 +63,13 @@ module TensorflowLite::Image
     # returns height x width that the models requires
     getter resolution : Tuple(Int32, Int32) do
       input_tensor = client[0]
-      # height, width
-      {input_tensor[1], input_tensor[2]}
+      # width, height (NOTE:: the tensors are around the other way around)
+      {input_tensor[2], input_tensor[1]}
     end
 
     # scales the image before invoking the tflite model
     def run(canvas : Canvas, scale_mode : Scale = @scaling_mode, resize_method : StumpyResize::InterpolationMethod = :bilinear)
-      desired_height, desired_width = resolution
+      desired_width, desired_height = resolution
       scaled = case scale_mode
                in .fit?
                  StumpyResize.scale_to_fit(canvas, desired_width, desired_height, resize_method)
@@ -87,7 +87,7 @@ module TensorflowLite::Image
 
     # :ditto:
     def detection_adjustments(image_width : Int32, image_height : Int32, scale_mode : Scale = @scaling_mode)
-      target_height, target_width = resolution
+      target_width, target_height = resolution
       case scale_mode
       in .fit?
         Image.calculate_boxing_offset(image_width, image_height, target_width, target_height)

@@ -60,7 +60,7 @@ module TensorflowLite::Image
     # the tensorflow lite client
     getter client : Client
 
-    # returns height x width that the models requires
+    # returns width x height that the models requires
     getter resolution : Tuple(Int32, Int32) do
       input_tensor = client[0]
       # width, height (NOTE:: the tensors are around the other way around)

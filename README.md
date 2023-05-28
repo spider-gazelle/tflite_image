@@ -129,11 +129,11 @@ puts "Unique objects found! pixels: #{detections.pixels.size}, unique: #{detecti
 # create a mask for the original image
 offsets = pose.detection_adjustments(canvas)
 mask = seg.scale_image_mask(canvas, scaled_mask, *offsets)
-StumpyPNG.write(mask, "./bin/segment_mask_output.png")
+StumpyPNG.write(mask, "./bin/mask.png")
 
 # overlay the mask onto the original image
 canvas.paste(mask, 0, 0)
-StumpyPNG.write(canvas, "./bin/masked_output.png")
+StumpyPNG.write(canvas, "./bin/masked_image.png")
 ```
 
 ## Contributing

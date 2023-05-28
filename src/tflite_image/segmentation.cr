@@ -39,15 +39,15 @@ class TensorflowLite::Image::Segmentation
                      out_height = output[1]
                      out_width = output[2]
                      out_labels = output[3]
-                     outputs = normalize_output_layer client.output(0)
 
                      # each output is a possible class and we pick the highest index
                      if labels.size == out_labels
+                       outputs = normalize_output_layer client.output(0)
                        calculate_labels(outputs, out_height, out_width, out_labels)
                      else
                        # sometimes there is a 1-to-1 matching outputs to pixel components versus
                        # an output per-label as above (input size matches output size)
-                       Slice(Int32).new(0)
+                       raise NotImplementedError.new("not sure how to interpret the results")
                      end
                    else
                      raise "unknown segmenation model output format: #{output.map(&.to_s).join("x")}"

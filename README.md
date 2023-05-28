@@ -99,6 +99,43 @@ pose.markup canvas, detections, *offsets
 StumpyPNG.write(canvas, "./bin/pose_output.png")
 ```
 
+Image Segmentation
+
+```crystal
+require "tflite_image"
+
+# init the tensorflow client with your object detection model
+client = TensorflowLite::Client.new(
+  model: URI.parse("https://raw.githubusercontent.com/google-coral/test_data/master/deeplabv3_mnv2_pascal_quant.tflite"),
+  labels: URI.parse("https://raw.githubusercontent.com/google-coral/test_data/master/pascal_voc_segmentation_labels.txt")
+)
+
+# init the segmentation
+seg = Segmentation.new(client)
+
+# load your image
+canvas = StumpyJPEG.read("./image.jpg")
+
+# run the model, outputs the scaled image that was run through the model
+scaled_canvas, detections = seg.run canvas
+scaled_mask = seg.build_image_mask detections
+
+# parse the outputs
+puts "Unique objects found! pixels: #{detections.pixels.size}, unique: #{detections.labels_detected}"
+
+# scale the mask to match the input image
+# ========================================================
+
+# create a mask for the original image
+offsets = pose.detection_adjustments(canvas)
+mask = seg.scale_image_mask(canvas, scaled_mask, *offsets)
+StumpyPNG.write(mask, "./bin/segment_mask_output.png")
+
+# overlay the mask onto the original image
+canvas.paste(mask, 0, 0)
+StumpyPNG.write(canvas, "./bin/masked_output.png")
+```
+
 ## Contributing
 
 1. Fork it (<https://github.com/spider-gazelle/tflite_image/fork>)

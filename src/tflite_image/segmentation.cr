@@ -128,4 +128,30 @@ class TensorflowLite::Image::Segmentation
 
     mask
   end
+
+  # scales the mask to fit on the image provided
+  def scale_image_mask(image : Canvas, mask : Canvas, left_offset : Int32 = 0, top_offset : Int32 = 0, resize_method : StumpyResize::InterpolationMethod = :bilinear)
+    scale_image_mask(image.width, image.height, mask, left_offset, top_offset, resize_method)
+  end
+
+  # scales the mask to fit the target width and height
+  def scale_image_mask(target_width : Int32, target_height : Int32, mask : Canvas, left_offset : Int32 = 0, top_offset : Int32 = 0, resize_method : StumpyResize::InterpolationMethod = :bilinear)
+    if left_offset == 0 && top_offset == 0
+      return StumpyResize.resize(mask, target_width, target_height, method: resize_method)
+    end
+
+    height = target_height - top_offset - top_offset
+    width = target_width - left_offset - left_offset
+    staging = StumpyResize.resize(mask, width, height, method: resize_method)
+
+    if width > target_width || height > target_height
+      # we want to crop the staging image
+      StumpyResize.crop(staging, -left_offset, -top_offset, width + left_offset, height + top_offset)
+    else
+      # we want to pad the staging image
+      new_canvas = Canvas.new(target_width, target_height)
+      new_canvas.paste(staging, left_offset, top_offset)
+      new_canvas
+    end
+  end
 end

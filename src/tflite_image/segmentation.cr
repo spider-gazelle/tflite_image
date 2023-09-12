@@ -88,7 +88,7 @@ class TensorflowLite::Image::Segmentation
   # The colormap is an array with 256 elements, each of which is a 3-element array representing an RGB color.
   class_getter pascal_label_colormap : Array(Tuple(UInt16, UInt16, UInt16)) do
     colormap = Array.new(256) { Array.new(3, 0_u16) }
-    indices = Array.new(256) { |i| i.to_u16 }
+    indices = Array.new(256, &.to_u16)
 
     8.times do |shift|
       3.times do |channel|

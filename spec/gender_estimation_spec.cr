@@ -39,7 +39,7 @@ module TensorflowLite::Image
       puts "input resolution: #{detector.resolution.join("x")}px"
 
       canvas = StumpyJPEG.read(SPEC_GENDER_MALE_IMAGE.expand.to_s)
-      scaled_canvas, detections = detector.run canvas
+      _, detections = detector.run canvas
 
       # set the gender variable
       detection = detections[0]
@@ -54,7 +54,7 @@ module TensorflowLite::Image
       puts "input resolution: #{detector.resolution.join("x")}px"
 
       canvas = StumpyJPEG.read(SPEC_GENDER_FEMALE_IMAGE.expand.to_s)
-      scaled_canvas, detections = detector.run canvas
+      _, detections = detector.run canvas
 
       # set the gender variable
       detection = detections[0]

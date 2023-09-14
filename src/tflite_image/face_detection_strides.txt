@@ -1,0 +1,45 @@
+
+# from mediapipe module; irrelevant parts removed
+# (reference: mediapipe/modules/face_detection/face_detection_front_cpu.pbtxt)
+SSD_OPTIONS_FRONT = {
+    'num_layers': 4,
+    'input_size_height': 128,
+    'input_size_width': 128,
+    'anchor_offset_x': 0.5,
+    'anchor_offset_y': 0.5,
+    'strides': [8, 16, 16, 16],
+    'interpolated_scale_aspect_ratio': 1.0
+}
+
+# (reference: modules/face_detection/face_detection_back_desktop_live.pbtxt)
+SSD_OPTIONS_BACK = {
+    'num_layers': 4,
+    'input_size_height': 256,
+    'input_size_width': 256,
+    'anchor_offset_x': 0.5,
+    'anchor_offset_y': 0.5,
+    'strides': [16, 32, 32, 32],
+    'interpolated_scale_aspect_ratio': 1.0
+}
+
+# (reference: modules/face_detection/face_detection_short_range_common.pbtxt)
+SSD_OPTIONS_SHORT = {
+    'num_layers': 4,
+    'input_size_height': 128,
+    'input_size_width': 128,
+    'anchor_offset_x': 0.5,
+    'anchor_offset_y': 0.5,
+    'strides': [8, 16, 16, 16],
+    'interpolated_scale_aspect_ratio': 1.0
+}
+
+# (reference: modules/face_detection/face_detection_full_range_common.pbtxt)
+SSD_OPTIONS_FULL = {
+    'num_layers': 1,
+    'input_size_height': 192,
+    'input_size_width': 192,
+    'anchor_offset_x': 0.5,
+    'anchor_offset_y': 0.5,
+    'strides': [4],
+    'interpolated_scale_aspect_ratio': 0.0
+}

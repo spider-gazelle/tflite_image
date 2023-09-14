@@ -205,23 +205,19 @@ class TensorflowLite::Image::FaceDetection
   # Mapping to (0,1)
   # score limit is 100 in mediapipe and leads to overflows with IEEE 754 floats
   # this lower limit is safe for use with the sigmoid functions and float32
-  def sigmoid(data : Slice(Float32)) : Array(Float64)
-    results = Array(Float64).new(data.size)
-    data.each do |x|
-      results << 1.0 / (1.0 + Math.exp(-x.to_f))
-    end
-    results
+  def sigmoid(data : Slice(Float32)) : Slice(Float32)
+    data.map! { |x| 1.0_f32 / (1.0_f32 + Math.exp(-x)) }
   end
 
   def intersection_over_union(det1 : Detection, det2 : Detection) : Float32
-    xA = [det1.left, det2.left].max
-    yA = [det1.bottom, det2.bottom].max
-    xB = [det1.right, det2.right].min
-    yB = [det1.top, det2.top].min
+    x_a = [det1.left, det2.left].max
+    y_a = [det1.bottom, det2.bottom].max
+    x_b = [det1.right, det2.right].min
+    y_b = [det1.top, det2.top].min
 
-    interArea = [xB - xA, 0.0_f32].max * [yB - yA, 0.0_f32].max
+    inter_area = [x_b - x_a, 0.0_f32].max * [y_b - y_a, 0.0_f32].max
 
-    iou = interArea / (det1.area + det2.area - interArea)
+    iou = inter_area / (det1.area + det2.area - inter_area)
     iou
   end
 
@@ -268,7 +264,7 @@ class TensorflowLite::Image::FaceDetection
     # Generate scales based on scales_per_octave
     octave_scales = (0...scales_per_octave).map { |i| 2.0 ** (i.to_f / scales_per_octave) }
 
-    strides.each_with_index do |stride, layer_id|
+    strides.each do |stride|
       feature_map_height = input_size_height // stride
       feature_map_width = input_size_width // stride
 

@@ -29,7 +29,7 @@ module TensorflowLite::Image
     # https://github.com/patlevin/face-detection-tflite/blob/main/fdlite/face_detection.py#L58
     detector.generate_anchors(strides: [16, 32, 32, 32])
 
-    it "detects objects in an using fit image", focus: true do
+    it "detects objects in an using fit image" do
       puts client.interpreter.inspect
       puts "input resolution: #{detector.resolution.join("x")}px"
 

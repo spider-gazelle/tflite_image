@@ -18,7 +18,7 @@ class TensorflowLite::Image::FaceDetection
   end
 
   getter anchors : Array(Anchor) = [] of Anchor
-  property confidence_threshold : Float32 = 0.7_f32
+  property confidence_threshold : Float32 = 0.6_f32
   property nms_similarity_threshold : Float32 = 0.5_f32
 
   # top, left, bottom, right are all percentages
@@ -31,6 +31,9 @@ class TensorflowLite::Image::FaceDetection
     index : Int32,
     score : Float64 do
     include JSON::Serializable
+
+    @[JSON::Field(ignore: true)]
+    @adjusted = false
 
     def lines(width, height, offset_left = 0, offset_top = 0)
       adjust(width, height, offset_left, offset_top)
@@ -53,7 +56,7 @@ class TensorflowLite::Image::FaceDetection
     end
 
     def adjust(canvas_width, canvas_height, offset_left, offset_top)
-      return if offset_left == 0 && offset_top == 0
+      return if @adjusted || offset_left == 0 && offset_top == 0
 
       height = canvas_height - offset_top - offset_top
       width = canvas_width - offset_left - offset_left
@@ -67,11 +70,27 @@ class TensorflowLite::Image::FaceDetection
       @right = right_px.to_f32 / canvas_width
       @bottom = bottom_px.to_f32 / canvas_height
       @top = top_px.to_f32 / canvas_height
+
+      @points.map! do |(x, y)|
+        x_px = (x * height).round.to_i + offset_left
+        y_px = (y * width).round.to_i + offset_top
+        {
+          x_px.to_f32 / canvas_width,
+          y_px.to_f32 / canvas_height,
+        }
+      end
+    ensure
+      @adjusted = true
     end
 
     def points(width, height, offset_left = 0, offset_top = 0)
-      # todo adjust
-      @points.map { |xy| {(xy[0] * width).round.to_i, (xy[1] * height).round.to_i} }
+      adjust(width, height, offset_left, offset_top)
+      @points.map do |xy|
+        {
+          (xy[0] * width).round.to_i,
+          (xy[1] * height).round.to_i,
+        }
+      end
     end
 
     def area : Float32
@@ -136,7 +155,7 @@ class TensorflowLite::Image::FaceDetection
       ymin = y_center - half_height
       ymax = y_center + half_height
 
-      points = box[4..-1].each_slice(2).to_a.map { |slice| {anchor_x + slice[0], anchor_y + slice[1] - half_height} }
+      points = box[4..-1].each_slice(2).to_a.map { |slice| {anchor_x + slice[0], anchor_y + slice[1]} }
 
       detections << Detection.new(
         top: ymax,
@@ -176,7 +195,7 @@ class TensorflowLite::Image::FaceDetection
       lines.each do |line|
         image.line(*line)
       end
-      detection.points(image.width, image.height).each do |point|
+      detection.points(image.width, image.height, left_offset, top_offset).each do |point|
         image.circle(*point, 4, filled: true)
       end
     end

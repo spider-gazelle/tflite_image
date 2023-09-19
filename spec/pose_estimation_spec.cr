@@ -31,13 +31,14 @@ module TensorflowLite::Image
 
       canvas = StumpyJPEG.read(SPEC_POSE_IMAGE.expand.to_s)
       scaled_canvas, detections = pose.run canvas, scale_mode: :cover
-      detections.size.should eq 17
+      detections.points.size.should eq 17
 
-      pose.markup scaled_canvas, detections
+      detections.markup scaled_canvas
       StumpyPNG.write(scaled_canvas, "./bin/poses_cover_scaled_output.png")
 
       offsets = pose.detection_adjustments(canvas, scale_mode: :cover)
-      pose.markup canvas, detections, *offsets
+      detections.adjust(canvas, *offsets)
+      detections.markup canvas
       StumpyPNG.write(canvas, "./bin/poses_cover_original_output.png")
     end
   end

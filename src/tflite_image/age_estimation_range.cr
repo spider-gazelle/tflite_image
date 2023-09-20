@@ -19,16 +19,25 @@ class TensorflowLite::Image::AgeEstimationRange
     (61..75),
   ]
 
-  struct Detection
-    include JSON::Serializable
+  struct Output
+    include Detection
+    include Detection::Classification
 
-    def initialize(@scores, @ranges)
+    def initialize(scores, ranges)
+      range = age_estimate(scores, ranges)
+      @index = range.begin
+      @upper = range.end
+      @score = (@index + (@upper - @index)).to_f32 / 2
     end
 
-    getter scores : Array(Float32)
-    getter ranges : Array(Range(Int32, Int32))
+    getter type : Symbol = :age_range
+    getter upper : Int32
 
-    getter age_estimate : Range(Int32, Int32) do
+    def age_range : Range(Int32, Int32)
+      (@index..@upper)
+    end
+
+    protected def age_estimate(scores, ranges) : Range(Int32, Int32)
       # Find the maximum value
       max_val = scores.max
 
@@ -56,7 +65,7 @@ class TensorflowLite::Image::AgeEstimationRange
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Detection))
+  def process(image : Canvas) : Tuple(Canvas, Array(Output))
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -67,7 +76,7 @@ class TensorflowLite::Image::AgeEstimationRange
 
     # transform the results
     detections = [
-      Detection.new(scores: outputs.to_a, ranges: ranges),
+      Output.new(scores: outputs.to_a, ranges: ranges),
     ]
 
     {image, detections}

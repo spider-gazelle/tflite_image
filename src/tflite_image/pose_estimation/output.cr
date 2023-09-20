@@ -20,7 +20,7 @@ class TensorflowLite::Image::PoseEstimation::Output
   def initialize(points : Array(PoseEstimation::Point))
     detections = {} of String => PoseEstimation::Point
     points.each do |point|
-      detections[point.name.as(String)] = point
+      detections[point.label.as(String)] = point
     end
 
     @points = detections
@@ -59,20 +59,14 @@ class TensorflowLite::Image::PoseEstimation::Output
     LINES.map do |line|
       points = line.map { |point| @points[point.to_s] }
 
-      previous = nil
-      points.each do |p2|
-        p1 = previous
-        previous = p2
-        next unless p1
-
-        next if p1.score < minimum_score
-        next if p2.score < minimum_score
-
+      points.each_with_index do |point, index|
+        next_point = points[index + 1]?
+        next unless next_point
         image.line(
-          (width * p1.x).round.to_i,
-          (height * p1.y).round.to_i,
-          (width * p2.x).round.to_i,
-          (height * p2.y).round.to_i,
+          (point.x * width).round.to_i,
+          (point.y * height).round.to_i,
+          (next_point.x * width).round.to_i,
+          (next_point.y * height).round.to_i,
           StumpyPNG::RGBA::WHITE
         )
       end

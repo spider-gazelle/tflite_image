@@ -37,10 +37,11 @@ module TensorflowLite::Image
       StumpyPNG.write(scaled_canvas, "./bin/detection_fit_scaled_output.png")
 
       offsets = detector.detection_adjustments(canvas)
-      detector.markup canvas, detections, *offsets
+      detector.adjust detections, canvas, *offsets
+      detector.markup canvas, detections
       StumpyPNG.write(canvas, "./bin/detection_fit_original_output.png")
 
-      detections[0].name.should eq "dining table"
+      detections[0].label.should eq "dining table"
     end
 
     it "detects objects in an using cover image" do
@@ -55,10 +56,11 @@ module TensorflowLite::Image
       StumpyPNG.write(scaled_canvas, "./bin/detection_cover_scaled_output.png")
 
       offsets = detector.detection_adjustments(canvas, scale_mode: :cover)
-      detector.markup canvas, detections, *offsets
+      detector.adjust detections, canvas, *offsets
+      detector.markup canvas, detections
       StumpyPNG.write(canvas, "./bin/detection_cover_original_output.png")
 
-      detections[0].name.should eq "potted plant"
+      detections[0].label.should eq "potted plant"
     end
   end
 end

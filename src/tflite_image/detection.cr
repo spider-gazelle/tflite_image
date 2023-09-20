@@ -7,9 +7,6 @@ module TensorflowLite::Image::Detection
   # i.e. object, pose, face, age, class
   abstract def type : Symbol
 
-  @[JSON::Field(ignore: true)]
-  getter adjusted : Bool = false
-
   getter associated : Array(Detection) { [] of Detection }
 
   # :nodoc:
@@ -20,5 +17,16 @@ module TensorflowLite::Image::Detection
   # :nodoc:
   def adjust(image : Canvas, offset_left : Int, offset_top : Int)
     self
+  end
+
+  # :nodoc:
+  def make_adjustment(
+    original_width : Int,
+    original_height : Int,
+    canvas_width : Int,
+    canvas_height : Int,
+    offset_left : Int,
+    offset_top : Int
+  ) : Nil
   end
 end

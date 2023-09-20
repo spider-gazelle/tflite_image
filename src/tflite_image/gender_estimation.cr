@@ -19,7 +19,7 @@ class TensorflowLite::Image::GenderEstimation
       gender = male_score > female_score ? Gender::Male : Gender::Female
       @score = {male_score, female_score}.max
       @alt_score = {male_score, female_score}.min
-      @name = gender.to_s
+      @label = gender.to_s
       @index = gender.value
       @gender = gender
     end

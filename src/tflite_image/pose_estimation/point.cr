@@ -8,6 +8,6 @@ class TensorflowLite::Image::PoseEstimation::Point
 
   def initialize(@joint, @y, @x, @score)
     @index = @joint.value
-    @name = @joint.to_s
+    @label = @joint.to_s
   end
 end

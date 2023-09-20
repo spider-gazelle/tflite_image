@@ -107,9 +107,8 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.age_estimate
       puts detection.inspect
-      detection.age_estimate.includes?(25).should be_true
+      detection.age_range.includes?(25).should be_true
     end
 
     it "detects young female age" do
@@ -121,9 +120,8 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.age_estimate
       puts detection.inspect
-      detection.age_estimate.includes?(20).should be_true
+      detection.age_range.includes?(20).should be_true
     end
 
     it "detects old male age" do
@@ -135,9 +133,8 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.age_estimate
       puts detection.inspect
-      detection.age_estimate.includes?(60).should be_true
+      detection.age_range.includes?(60).should be_true
     end
 
     it "detects old female age" do
@@ -149,9 +146,8 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.age_estimate
       puts detection.inspect
-      detection.age_estimate.includes?(65).should be_true
+      detection.age_range.includes?(65).should be_true
     end
   end
 end

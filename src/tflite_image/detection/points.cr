@@ -40,17 +40,27 @@ module TensorflowLite::Image::Detection
     end
   end
 
+  class GenericPoint
+    include Point
+
+    def initialize(@x : Float32, @y : Float32)
+    end
+
+    def self.new(x : Float32, y : Float32)
+      previous_def(x, y).as(Detection::Point)
+    end
+  end
+
   module Points
     abstract def points : Hash(String, Detection::Point)
 
     def adjust(canvas_width : Int, canvas_height : Int, offset_left : Int, offset_top : Int)
-      return if @adjusted || (offset_left.zero? && offset_top.zero?)
+      return if offset_left.zero? && offset_top.zero?
 
       height = canvas_height - offset_top - offset_top
       width = canvas_width - offset_left - offset_left
 
       points.each_value &.make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
-      @adjusted = true
       self
     end
 

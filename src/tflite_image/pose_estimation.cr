@@ -44,6 +44,22 @@ class TensorflowLite::Image::PoseEstimation
 
     {image, PoseEstimation::Output.new(points)}
   end
+
+  # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)
+  #
+  # you can run `detection_adjustments` just once and then apply them to detections for each invokation using this function
+  def adjust(detections : Array(Output), target_width : Int32, target_height : Int32, offset_left : Int32, offset_top : Int32) : Array(Output)
+    return detections if offset_left.zero? && offset_top.zero?
+    height = target_height - offset_top - offset_top
+    width = target_width - offset_left - offset_left
+    detections.each(&.make_adjustment(width, height, target_width, target_height, offset_left, offset_top))
+    detections
+  end
+
+  # :ditto:
+  def adjust(detections : Array(Output), image : Canvas, offset_left : Int32, offset_top : Int32) : Array(Output)
+    adjust(detections, image.width, image.height, offset_left, offset_top)
+  end
 end
 
 require "./pose_estimation/*"

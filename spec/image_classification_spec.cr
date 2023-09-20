@@ -34,7 +34,7 @@ describe TensorflowLite::Image::Classification do
 
     StumpyPNG.write(scaled_canvas, "./bin/classification_output.png")
 
-    detections[0].name.should eq "pomegranate"
-    detections[1].name.should eq "Granny Smith"
+    detections[0].label.should eq "pomegranate"
+    detections[1].label.should eq "Granny Smith"
   end
 end

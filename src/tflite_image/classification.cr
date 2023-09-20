@@ -6,19 +6,18 @@ require "../tflite_image.cr"
 class TensorflowLite::Image::Classification
   include Image::Common
 
-  struct Detection
-    include JSON::Serializable
+  class Output
+    include Detection
+    include Detection::Classification
 
-    def initialize(@classification, @score, @name)
+    def initialize(@index, @score, @label = nil)
     end
 
-    getter classification : Int32
-    getter score : Float32
-    property name : String?
+    getter type : Symbol = :class
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Detection))
+  def process(image : Canvas) : Tuple(Canvas, Array(Output))
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -36,9 +35,9 @@ class TensorflowLite::Image::Classification
 
     # transform the results
     detections = top_10_indices.map_with_index do |klass, index|
-      Detection.new(
-        classification: klass,
-        name: labels[klass]?,
+      Output.new(
+        index: klass,
+        label: labels[klass]?,
         score: top_10_values[index]
       )
     end

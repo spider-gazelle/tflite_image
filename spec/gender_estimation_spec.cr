@@ -43,8 +43,7 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.gender
-      puts detection.inspect
+      puts detection.to_json
 
       detection.gender.male?.should eq true
     end
@@ -58,8 +57,7 @@ module TensorflowLite::Image
 
       # set the gender variable
       detection = detections[0]
-      detection.gender
-      puts detection.inspect
+      puts detection.to_json
 
       detection.gender.female?.should eq true
     end

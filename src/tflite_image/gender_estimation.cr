@@ -11,19 +11,26 @@ class TensorflowLite::Image::GenderEstimation
     Female
   end
 
-  struct Detection
-    include JSON::Serializable
+  class Output
+    include Detection
+    include Detection::Classification
 
-    def initialize(@male_score, @female_score)
+    def initialize(male_score, female_score)
+      gender = male_score > female_score ? Gender::Male : Gender::Female
+      @score = {male_score, female_score}.max
+      @alt_score = {male_score, female_score}.min
+      @label = gender.to_s
+      @index = gender.value
+      @gender = gender
     end
 
-    getter male_score : Float32
-    getter female_score : Float32
-    getter gender : Gender { male_score > female_score ? Gender::Male : Gender::Female }
+    getter alt_score : Float32
+    getter gender : Gender
+    getter type : Symbol = :gender
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Detection))
+  def process(image : Canvas) : Tuple(Canvas, Array(Output))
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -34,7 +41,7 @@ class TensorflowLite::Image::GenderEstimation
 
     # transform the results
     detections = [
-      Detection.new(male_score: outputs[0], female_score: outputs[1]),
+      Output.new(male_score: outputs[0], female_score: outputs[1]),
     ]
 
     {image, detections}

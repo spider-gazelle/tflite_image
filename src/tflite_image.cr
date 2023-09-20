@@ -1,6 +1,7 @@
 require "json"
 require "stumpy_core"
 require "stumpy_resize"
+require "./tflite_image/detection"
 
 module TensorflowLite::Image
   enum Format

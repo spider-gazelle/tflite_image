@@ -9,97 +9,21 @@ require "./image_offset_calculations"
 class TensorflowLite::Image::FaceDetection
   include Image::Common
 
-  struct Anchor
-    def initialize(@x_center, @y_center)
-    end
-
-    property x_center : Float32
-    property y_center : Float32
+  enum FaceFeatures
+    LeftEye         = 0
+    RightEye        = 1
+    NoseTip         = 2
+    Mouth           = 3
+    LeftEyeTragion  = 4
+    RightEyeTragion = 5
   end
 
   getter anchors : Array(Anchor) = [] of Anchor
   property confidence_threshold : Float32 = 0.6_f32
   property nms_similarity_threshold : Float32 = 0.5_f32
 
-  # top, left, bottom, right are all percentages
-  record Detection,
-    top : Float32,
-    left : Float32,
-    bottom : Float32,
-    right : Float32,
-    points : Array(Tuple(Float32, Float32)),
-    index : Int32,
-    score : Float64 do
-    include JSON::Serializable
-
-    @[JSON::Field(ignore: true)]
-    @adjusted = false
-
-    def lines(width, height, offset_left = 0, offset_top = 0)
-      adjust(width, height, offset_left, offset_top)
-
-      top_px = (top * height).round.to_i
-      bottom_px = (bottom * height).round.to_i
-      left_px = (left * width).round.to_i
-      right_px = (right * width).round.to_i
-
-      {
-        # top line
-        {left_px, top_px, right_px, top_px},
-        # left line
-        {left_px, top_px, left_px, bottom_px},
-        # right line
-        {right_px, top_px, right_px, bottom_px},
-        # bottom line
-        {left_px, bottom_px, right_px, bottom_px},
-      }
-    end
-
-    def adjust(canvas_width, canvas_height, offset_left, offset_top)
-      return if @adjusted || offset_left == 0 && offset_top == 0
-
-      height = canvas_height - offset_top - offset_top
-      width = canvas_width - offset_left - offset_left
-
-      top_px = (top * height).round.to_i + offset_top
-      bottom_px = (bottom * height).round.to_i + offset_top
-      left_px = (left * width).round.to_i + offset_left
-      right_px = (right * width).round.to_i + offset_left
-
-      @left = left_px.to_f32 / canvas_width
-      @right = right_px.to_f32 / canvas_width
-      @bottom = bottom_px.to_f32 / canvas_height
-      @top = top_px.to_f32 / canvas_height
-
-      @points.map! do |(x, y)|
-        x_px = (x * height).round.to_i + offset_left
-        y_px = (y * width).round.to_i + offset_top
-        {
-          x_px.to_f32 / canvas_width,
-          y_px.to_f32 / canvas_height,
-        }
-      end
-    ensure
-      @adjusted = true
-    end
-
-    def points(width, height, offset_left = 0, offset_top = 0)
-      adjust(width, height, offset_left, offset_top)
-      @points.map do |xy|
-        {
-          (xy[0] * width).round.to_i,
-          (xy[1] * height).round.to_i,
-        }
-      end
-    end
-
-    def area : Float32
-      (@right - @left) * (@top - @bottom)
-    end
-  end
-
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Detection))
+  def process(image : Canvas) : Tuple(Canvas, Array(Output))
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -125,7 +49,7 @@ class TensorflowLite::Image::FaceDetection
     scale = resolution[0].to_f32
 
     # transform the results and sort by confidence
-    detections = [] of Detection
+    detections = [] of Output
     anchor_probability.each_with_index do |probability, index|
       next unless probability >= @confidence_threshold
 
@@ -155,16 +79,20 @@ class TensorflowLite::Image::FaceDetection
       ymin = y_center - half_height
       ymax = y_center + half_height
 
-      points = box[4..-1].each_slice(2).to_a.map { |slice| {anchor_x + slice[0], anchor_y + slice[1]} }
+      point_x_y = box[4..-1].each_slice(2).to_a.map { |slice| {anchor_x + slice[0], anchor_y + slice[1]} }
+      points = Array(Point).new(point_x_y.size)
+      point_x_y.each_with_index do |(x, y), i|
+        points << Point.new(FaceFeatures.from_value(i), x, y, probability)
+      end
 
-      detections << Detection.new(
+      detections << Output.new(
         top: ymax,
         left: xmin,
         bottom: ymin,
         right: xmax,
-        points: points,
+        score: probability,
         index: index,
-        score: probability
+        points: points,
       )
     end
 
@@ -174,30 +102,27 @@ class TensorflowLite::Image::FaceDetection
   # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)
   #
   # you can run `detection_adjustments` just once and then apply them to detections for each invokation using this function
-  def adjust(target_width : Int32, target_height : Int32, detections : Array(Detection), left_offset : Int32, top_offset : Int32) : Array(Detection)
-    detections.each(&.adjust(target_width, target_height, left_offset, top_offset))
+  def adjust(detections : Array(Output), target_width : Int32, target_height : Int32, offset_left : Int32, offset_top : Int32) : Array(Output)
+    return detections if offset_left.zero? && offset_top.zero?
+    height = target_height - offset_top - offset_top
+    width = target_width - offset_left - offset_left
+    detections.each(&.make_adjustment(width, height, target_width, target_height, offset_left, offset_top))
+    detections
   end
 
   # :ditto:
-  def adjust(image : Canvas, detections : Array(Detection), left_offset : Int32, top_offset : Int32) : Array(Detection)
-    adjust(image.width, image.height, detections, left_offset, top_offset)
+  def adjust(detections : Array(Output), image : Canvas, offset_left : Int32, offset_top : Int32) : Array(Output)
+    adjust(detections, image.width, image.height, offset_left, offset_top)
   end
 
   # add the detection details to an image
   #
   # if marking up the original image,
   # you'll need to take into account how it was scaled
-  def markup(image : Canvas, detections : Array(Detection), left_offset : Int32 = 0, top_offset : Int32 = 0, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, detections : Array(Output), minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
     detections.each do |detection|
       next if detection.score < minimum_score
-
-      lines = detection.lines(image.width, image.height, left_offset, top_offset)
-      lines.each do |line|
-        image.line(*line)
-      end
-      detection.points(image.width, image.height, left_offset, top_offset).each do |point|
-        image.circle(*point, 4, filled: true)
-      end
+      detection.markup(image, font)
     end
     image
   end
@@ -209,7 +134,7 @@ class TensorflowLite::Image::FaceDetection
     data.map! { |x| 1.0_f32 / (1.0_f32 + Math.exp(-x)) }
   end
 
-  def intersection_over_union(det1 : Detection, det2 : Detection) : Float32
+  def intersection_over_union(det1 : Output, det2 : Output) : Float32
     x_a = [det1.left, det2.left].max
     y_a = [det1.bottom, det2.bottom].max
     x_b = [det1.right, det2.right].min
@@ -221,12 +146,12 @@ class TensorflowLite::Image::FaceDetection
     iou
   end
 
-  def non_maximum_suppression(detections : Array(Detection), iou_threshold : Float32) : Array(Detection)
+  def non_maximum_suppression(detections : Array(Output), iou_threshold : Float32) : Array(Output)
     # Sort detections by score in descending order
     sorted_detections = detections.sort_by! { |d| -d.score }
 
     suppressed = Array(Bool).new(detections.size, false)
-    result = [] of Detection
+    result = [] of Output
 
     sorted_detections.each_with_index do |det, i|
       next if suppressed[i]
@@ -291,3 +216,5 @@ class TensorflowLite::Image::FaceDetection
     @anchors = anchors
   end
 end
+
+require "./face_detection/*"

@@ -6,19 +6,21 @@ require "../tflite_image.cr"
 class TensorflowLite::Image::AgeEstimationExact
   include Image::Common
 
-  property output_factor : Int32 = 116
+  property output_factor : Int32 = 110
 
-  struct Detection
-    include JSON::Serializable
+  class Output
+    include Detection
+    include Detection::Classification
 
     def initialize(@score)
+      @index = @score.round.to_i
     end
 
-    getter score : Float32
+    getter type : Symbol = :age
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Detection))
+  def process(image : Canvas) : Tuple(Canvas, Array(Output))
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -29,7 +31,7 @@ class TensorflowLite::Image::AgeEstimationExact
 
     # transform the results
     detections = [
-      Detection.new(score: outputs[0] * output_factor),
+      Output.new(score: outputs[0] * output_factor),
     ]
 
     {image, detections}

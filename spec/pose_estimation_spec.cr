@@ -30,7 +30,8 @@ module TensorflowLite::Image
       puts "input resolution: #{pose.resolution.join("x")}px"
 
       canvas = StumpyJPEG.read(SPEC_POSE_IMAGE.expand.to_s)
-      scaled_canvas, detections = pose.run canvas, scale_mode: :cover
+      scaled_canvas, output = pose.run canvas, scale_mode: :cover
+      detections = output[0]
       detections.points.size.should eq 17
 
       detections.markup scaled_canvas

@@ -23,7 +23,7 @@ class TensorflowLite::Image::FaceDetection
   property nms_similarity_threshold : Float32 = 0.5_f32
 
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Output))
+  def process(image : Canvas) : Array(Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -96,7 +96,7 @@ class TensorflowLite::Image::FaceDetection
       )
     end
 
-    {image, non_maximum_suppression(detections, @nms_similarity_threshold)}
+    non_maximum_suppression(detections, @nms_similarity_threshold)
   end
 
   # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)

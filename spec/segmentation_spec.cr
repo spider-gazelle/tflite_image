@@ -24,7 +24,8 @@ module TensorflowLite::Image
       puts "Labels:\n#{seg.labels}"
 
       canvas = StumpyPNG.read(SPEC_SEG_IMAGE.expand.to_s)
-      scaled_canvas, detections = seg.run canvas
+      scaled_canvas, outputs = seg.run canvas
+      detections = outputs[0]
       puts "Unique objects found! pixels: #{detections.pixels.size}, unique: #{detections.labels_detected}"
 
       mask = seg.build_image_mask detections
@@ -47,7 +48,8 @@ module TensorflowLite::Image
       puts "Labels:\n#{seg.labels}"
 
       canvas = StumpyPNG.read(SPEC_SEG_IMAGE.expand.to_s)
-      scaled_canvas, detections = seg.run canvas, scale_mode: :cover
+      scaled_canvas, outputs = seg.run canvas, scale_mode: :cover
+      detections = outputs[0]
       puts "Unique objects found! pixels: #{detections.pixels.size}, unique: #{detections.labels_detected}"
 
       mask = seg.build_image_mask detections

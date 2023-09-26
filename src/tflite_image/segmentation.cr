@@ -21,7 +21,7 @@ class TensorflowLite::Image::Segmentation
   end
 
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Detection)
+  def process(image : Canvas) : Array(Detection)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -54,7 +54,7 @@ class TensorflowLite::Image::Segmentation
                    end
 
     # the scaled image, the label index for each pixel, the list of text labels
-    {image, Detection.new(pixel_labels, labels)}
+    [Detection.new(pixel_labels, labels)]
   end
 
   protected def calculate_labels(outputs, height, width, label_count)

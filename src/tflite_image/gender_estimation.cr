@@ -30,7 +30,7 @@ class TensorflowLite::Image::GenderEstimation
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Output))
+  def process(image : Canvas) : Array(Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -44,6 +44,6 @@ class TensorflowLite::Image::GenderEstimation
       Output.new(male_score: outputs[0], female_score: outputs[1]),
     ]
 
-    {image, detections}
+    detections
   end
 end

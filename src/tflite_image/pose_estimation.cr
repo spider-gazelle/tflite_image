@@ -28,7 +28,7 @@ class TensorflowLite::Image::PoseEstimation
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, PoseEstimation::Output)
+  def process(image : Canvas) : Array(PoseEstimation::Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -42,7 +42,7 @@ class TensorflowLite::Image::PoseEstimation
       points << PoseEstimation::Point.new(BodyJoint.from_value(index), values[0], values[1], values[2])
     end
 
-    {image, PoseEstimation::Output.new(points)}
+    [PoseEstimation::Output.new(points)]
   end
 
   # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)

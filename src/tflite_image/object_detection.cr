@@ -9,7 +9,7 @@ class TensorflowLite::Image::ObjectDetection
   include Image::Common
 
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas) : Tuple(Canvas, Array(Output))
+  def process(image : Canvas) : Array(Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -40,7 +40,7 @@ class TensorflowLite::Image::ObjectDetection
       )
     }.sort_by! { |d| -d.score }
 
-    {image, detections}
+    detections
   end
 
   # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)

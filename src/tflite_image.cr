@@ -77,8 +77,10 @@ module TensorflowLite::Image
                in .cover?
                  StumpyResize.scale_to_cover(canvas, desired_width, desired_height, resize_method)
                end
-      process scaled
+      { scaled, process(scaled) }
     end
+
+    abstract def process(image : Canvas) : Array
 
     # this will calculate the adjustments required to the detections for
     # overlaying on the original image (or a scaled image in the same aspect ratio)

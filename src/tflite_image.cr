@@ -77,7 +77,7 @@ module TensorflowLite::Image
                in .cover?
                  StumpyResize.scale_to_cover(canvas, desired_width, desired_height, resize_method)
                end
-      { scaled, process(scaled) }
+      {scaled, process(scaled)}
     end
 
     abstract def process(image : Canvas) : Array

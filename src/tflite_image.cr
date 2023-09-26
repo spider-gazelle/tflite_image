@@ -180,7 +180,7 @@ module TensorflowLite::Image
       in .float?
         inputs = input_layer.as_f32
         canvas.buffer.each_with_index do |component, index|
-          inputs[index] = component.to_f32 / UInt16::MAX
+          inputs[index] = component.to_f32 / UInt8::MAX
         end
       end
     end

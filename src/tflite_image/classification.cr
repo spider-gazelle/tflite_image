@@ -17,7 +17,7 @@ class TensorflowLite::Image::Classification
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared
-  def process(image : Canvas) : Array(Output)
+  def process(image : Canvas | FFmpeg::Frame) : Array(Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net

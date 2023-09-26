@@ -21,7 +21,7 @@ class TensorflowLite::Image::Segmentation
   end
 
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas) : Array(Detection)
+  def process(image : Canvas | FFmpeg::Frame) : Array(Detection)
     apply_canvas_to_input_tensor image
 
     # execute the neural net

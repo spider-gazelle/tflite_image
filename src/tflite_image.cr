@@ -3,6 +3,23 @@ require "stumpy_core"
 require "stumpy_resize"
 require "./tflite_image/detection"
 
+# optionally make use of ffmpeg if available
+{% if file_exists?("#{__DIR__}/../lib/ffmpeg/shard.yml") %}
+  require "ffmpeg"
+{% else %}
+  struct FFmpeg::Frame
+    enum Format
+      Rgb24
+      None
+    end
+
+    getter pixel_format : Format = Format::None
+    getter buffer : Bytes = Bytes[0]
+    getter width : Int32 = 0
+    getter height : Int32 = 0
+  end
+{% end %}
+
 module TensorflowLite::Image
   enum Format
     Float
@@ -80,7 +97,7 @@ module TensorflowLite::Image
       {scaled, process(scaled)}
     end
 
-    abstract def process(image : Canvas) : Array
+    abstract def process(image : Canvas | FFmpeg::Frame) : Array
 
     # this will calculate the adjustments required to the detections for
     # overlaying on the original image (or a scaled image in the same aspect ratio)
@@ -141,6 +158,31 @@ module TensorflowLite::Image
           inputs[idx] = rgb.r.to_f32 / UInt16::MAX
           inputs[idx + 1] = rgb.g.to_f32 / UInt16::MAX
           inputs[idx + 2] = rgb.b.to_f32 / UInt16::MAX
+        end
+      end
+    end
+
+    # assumes that FFmpeg::Frame is in RGB24 format
+    protected def apply_canvas_to_input_tensor(canvas : FFmpeg::Frame)
+      raise "unexpected frame format #{canvas.pixel_format}, expected RGB24" unless canvas.pixel_format.rgb24?
+      pointer = Pointer(UInt8).new(canvas.buffer.to_unsafe.address)
+      frame_buffer = Slice.new(pointer, canvas.width * canvas.height * 3)
+
+      input_layer = client[0]
+      case input_format
+      in .quantized?
+        # we can copy the buffer directly
+        inputs = input_layer.as_u8
+        frame_buffer.copy_to inputs
+      in .quantized_signed?
+        inputs = input_layer.as_i8
+        frame_buffer.each_with_index do |component, index|
+          inputs[index] = (component.to_i - 128).to_i8
+        end
+      in .float?
+        inputs = input_layer.as_f32
+        frame_buffer.each_with_index do |component, index|
+          inputs[index] = component.to_f32 / UInt16::MAX
         end
       end
     end

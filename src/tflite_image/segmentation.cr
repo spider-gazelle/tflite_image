@@ -6,8 +6,16 @@ require "../tflite_image.cr"
 class TensorflowLite::Image::Segmentation
   include Image::Common
 
-  record Detection, pixels : Slice(Int32), labels : Array(String) do
-    include JSON::Serializable
+  class Output
+    include Detection
+
+    def initialize(@pixels, @labels)
+    end
+
+    getter type : Symbol = :segmentation
+
+    getter pixels : Array(Int32)
+    getter labels : Array(String)
 
     def labels_detected
       counts = Hash(String, Int32).new { |hash, key| hash[key] = 0 }
@@ -21,7 +29,7 @@ class TensorflowLite::Image::Segmentation
   end
 
   # attempts to classify the object, assumes the image has already been prepared
-  def process(image : Canvas | FFmpeg::Frame) : Array(Detection)
+  def process(image : Canvas | FFmpeg::Frame) : Array(Output)
     apply_canvas_to_input_tensor image
 
     # execute the neural net
@@ -34,7 +42,7 @@ class TensorflowLite::Image::Segmentation
     pixel_labels = case output.rank
                    when 3
                      # each pixel has an integer represenation of the class
-                     output.as_type.map &.to_i
+                     output.as_type.to_a.map &.to_i
                    when 4
                      out_height = output[1]
                      out_width = output[2]
@@ -54,12 +62,12 @@ class TensorflowLite::Image::Segmentation
                    end
 
     # the scaled image, the label index for each pixel, the list of text labels
-    [Detection.new(pixel_labels, labels)]
+    [Output.new(pixel_labels, labels)]
   end
 
   protected def calculate_labels(outputs, height, width, label_count)
     # A label per-pixel
-    pixel_labels = Slice(Int32).new(width * height)
+    pixel_labels = Array(Int32).new(width * height)
     pixel_labels.each_index do |index|
       # return a sub-slice of the possible outputs for this pixel
       idx = index * label_count

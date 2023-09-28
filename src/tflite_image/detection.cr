@@ -29,4 +29,8 @@ module TensorflowLite::Image::Detection
     offset_top : Int
   ) : Nil
   end
+
+  def markup(image : Canvas, font : PCFParser::Font? = nil) : Canvas
+    image
+  end
 end

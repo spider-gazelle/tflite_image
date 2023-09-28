@@ -62,6 +62,8 @@ class TensorflowLite::Image::ObjectDetection::Output
   end
 
   def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+    return image unless @score >= minimum_score
+
     width, height = image.width, image.height
 
     points = boundary.points

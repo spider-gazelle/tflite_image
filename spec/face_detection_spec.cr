@@ -39,12 +39,12 @@ module TensorflowLite::Image
       scaled_canvas, detections = detector.run canvas
       puts detections.inspect
 
-      detector.markup scaled_canvas, detections
+      Image.markup scaled_canvas, detections
       StumpyPNG.write(scaled_canvas, "./bin/face_fit_scaled_output.png")
 
       offsets = detector.detection_adjustments(canvas)
-      detector.adjust detections, canvas, *offsets
-      detector.markup canvas, detections
+      Image.adjust detections, canvas, *offsets
+      Image.markup canvas, detections
       StumpyPNG.write(canvas, "./bin/face_fit_original_output.png")
     end
 
@@ -56,12 +56,12 @@ module TensorflowLite::Image
       scaled_canvas, detections = detector.run canvas, scale_mode: :cover
       puts detections.inspect
 
-      detector.markup scaled_canvas, detections
+      Image.markup scaled_canvas, detections
       StumpyPNG.write(scaled_canvas, "./bin/face_cover_scaled_output.png")
 
       offsets = detector.detection_adjustments(canvas, scale_mode: :cover)
-      detector.adjust detections, canvas, *offsets
-      detector.markup canvas, detections
+      Image.adjust detections, canvas, *offsets
+      Image.markup canvas, detections
       StumpyPNG.write(canvas, "./bin/face_cover_original_output.png")
     end
   end

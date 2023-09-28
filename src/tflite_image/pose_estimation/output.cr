@@ -45,7 +45,7 @@ class TensorflowLite::Image::PoseEstimation::Output
   #
   # if marking up the original image,
   # you'll need to take into account how it was scaled and provide offsets
-  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
     width, height = image.width, image.height
 
     @points.each_value do |point|

@@ -61,7 +61,7 @@ class TensorflowLite::Image::ObjectDetection::Output
     @top = top_px.to_f32 / canvas_height
   end
 
-  def markup(image : Canvas, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
     width, height = image.width, image.height
 
     points = boundary.points

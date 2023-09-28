@@ -30,7 +30,7 @@ module TensorflowLite::Image::Detection
   ) : Nil
   end
 
-  def markup(image : Canvas, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
     image
   end
 end

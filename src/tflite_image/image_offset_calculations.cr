@@ -66,4 +66,34 @@ module TensorflowLite::Image
 
     {left_offset, top_offset}
   end
+
+  # adjust the detections so they can be applied directly to the source image (or a scaled version in the same aspect ratio)
+  #
+  # you can run `detection_adjustments` just once and then apply them to detections for each invokation using this function
+  def self.adjust(detections : Array, target_width : Int32, target_height : Int32, offset_left : Int32, offset_top : Int32)
+    return detections if offset_left.zero? && offset_top.zero?
+    height = target_height - offset_top - offset_top
+    width = target_width - offset_left - offset_left
+    detections.each(&.make_adjustment(width, height, target_width, target_height, offset_left, offset_top))
+    detections
+  end
+
+  # :ditto:
+  def self.adjust(detections : Array, image : Canvas | FFmpeg::Frame, offset_left : Int32, offset_top : Int32)
+    adjust(detections, image.width, image.height, offset_left, offset_top)
+  end
+
+  # add the detection details to an image
+  #
+  # if marking up the original image,
+  # you'll need to take into account how it was scaled
+  def self.markup(image : Canvas, detections : Array, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+    detections.each do |detection|
+      if detection.responds_to?(:score)
+        next if detection.score < minimum_score
+      end
+      detection.markup(image, minimum_score, font)
+    end
+    image
+  end
 end

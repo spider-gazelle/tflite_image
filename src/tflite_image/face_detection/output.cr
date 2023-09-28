@@ -82,7 +82,7 @@ class TensorflowLite::Image::FaceDetection::Output
     points.each_value &.make_adjustment(original_width, original_height, canvas_width, canvas_height, offset_left, offset_top)
   end
 
-  def markup(image : Canvas, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
     width, height = image.width, image.height
 
     points = boundary.points

@@ -15,8 +15,8 @@ module TensorflowLite::Image::Detection
   end
 
   # :nodoc:
-  def adjust(image : Canvas, offset_left : Int, offset_top : Int)
-    self
+  def adjust(image, offset_left : Int, offset_top : Int)
+    adjust(image.width, image.height, offset_left, offset_top)
   end
 
   # :nodoc:

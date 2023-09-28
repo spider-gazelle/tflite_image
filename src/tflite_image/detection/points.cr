@@ -19,11 +19,6 @@ module TensorflowLite::Image::Detection
       self
     end
 
-    # :ditto:
-    def adjust(image : Canvas, offset_left : Int, offset_top : Int)
-      adjust(image.width, image.height, offset_left, offset_top)
-    end
-
     def make_adjustment(
       original_width : Int,
       original_height : Int,
@@ -62,11 +57,6 @@ module TensorflowLite::Image::Detection
 
       points.each_value &.make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
       self
-    end
-
-    # :ditto:
-    def adjust(image : Canvas, offset_left : Int, offset_top : Int)
-      adjust(image.width, image.height, offset_left, offset_top)
     end
   end
 end

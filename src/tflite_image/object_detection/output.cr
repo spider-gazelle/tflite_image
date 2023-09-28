@@ -42,11 +42,6 @@ class TensorflowLite::Image::ObjectDetection::Output
     self
   end
 
-  # :ditto:
-  def adjust(image : Canvas, offset_left : Int, offset_top : Int)
-    adjust(image.width, image.height, offset_left, offset_top)
-  end
-
   def make_adjustment(
     original_width : Int,
     original_height : Int,

@@ -101,7 +101,7 @@ module TensorflowLite::Image
 
     # this will calculate the adjustments required to the detections for
     # overlaying on the original image (or a scaled image in the same aspect ratio)
-    def detection_adjustments(image : Canvas, scale_mode : Scale = @scaling_mode)
+    def detection_adjustments(image, scale_mode : Scale = @scaling_mode)
       detection_adjustments(image.width, image.height, scale_mode)
     end
 

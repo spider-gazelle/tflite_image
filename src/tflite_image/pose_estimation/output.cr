@@ -28,6 +28,10 @@ class TensorflowLite::Image::PoseEstimation::Output
 
   getter type : Symbol = :pose
 
+  def label : String?
+    nil
+  end
+
   def lines : Indexable(Detection::Line)
     LINES.map do |line|
       line = line.map { |point| @points[point.to_s].as(Detection::Point) }

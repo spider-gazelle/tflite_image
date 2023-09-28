@@ -5,6 +5,8 @@ class TensorflowLite::Image::FaceDetection::Output
   include Detection::Points
   include Detection::BoundingBox
 
+  LABEL = "face"
+
   def initialize(
     @top : Float32,
     @left : Float32,
@@ -14,7 +16,7 @@ class TensorflowLite::Image::FaceDetection::Output
     @index : Int32,
     points : Array(FaceDetection::Point)
   )
-    @label = :face
+    @label = LABEL
 
     detections = {} of String => FaceDetection::Point
     points.each do |point|

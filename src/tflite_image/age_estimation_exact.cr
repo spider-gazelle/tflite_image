@@ -17,6 +17,10 @@ class TensorflowLite::Image::AgeEstimationExact
     end
 
     getter type : Symbol = :age
+
+    def label : String?
+      nil
+    end
   end
 
   # attempts to classify the object, assumes the canvas has already been prepared

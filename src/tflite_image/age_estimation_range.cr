@@ -33,6 +33,10 @@ class TensorflowLite::Image::AgeEstimationRange
     getter type : Symbol = :age_range
     getter upper : Int32
 
+    def label : String?
+      nil
+    end
+
     def age_range : Range(Int32, Int32)
       (@index..@upper)
     end

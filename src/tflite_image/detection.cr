@@ -6,6 +6,7 @@ module TensorflowLite::Image::Detection
 
   # i.e. object, pose, face, age, class
   abstract def type : Symbol
+  abstract def label : String?
 
   getter associated : Array(Detection) { [] of Detection }
 

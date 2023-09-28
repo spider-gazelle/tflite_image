@@ -17,6 +17,10 @@ class TensorflowLite::Image::Segmentation
     getter pixels : Array(Int32)
     getter labels : Array(String)
 
+    def label : String?
+      nil
+    end
+
     def labels_detected
       counts = Hash(String, Int32).new { |hash, key| hash[key] = 0 }
       pixels.each do |idx|

@@ -55,8 +55,19 @@ module TensorflowLite::Image::Detection
       height = canvas_height - offset_top - offset_top
       width = canvas_width - offset_left - offset_left
 
-      points.each_value &.make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
+      make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
       self
+    end
+
+    def make_adjustment(
+      original_width : Int,
+      original_height : Int,
+      canvas_width : Int,
+      canvas_height : Int,
+      offset_left : Int,
+      offset_top : Int
+    ) : Nil
+      points.each_value &.make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
     end
   end
 end

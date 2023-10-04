@@ -67,7 +67,7 @@ module TensorflowLite::Image::Detection
       offset_left : Int,
       offset_top : Int
     ) : Nil
-      points.each_value &.make_adjustment(width, height, canvas_width, canvas_height, offset_left, offset_top)
+      points.each_value &.make_adjustment(original_width, original_height, canvas_width, canvas_height, offset_left, offset_top)
     end
   end
 end

@@ -84,7 +84,7 @@ class TensorflowLite::Image::FaceDetection::Output
     points.each_value &.make_adjustment(original_width, original_height, canvas_width, canvas_height, offset_left, offset_top)
   end
 
-  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil, color = StumpyPNG::RGBA::WHITE) : Canvas
     return image unless @score >= minimum_score
 
     width, height = image.width, image.height
@@ -97,14 +97,14 @@ class TensorflowLite::Image::FaceDetection::Output
         (point.y * height).round.to_i,
         (next_point.x * width).round.to_i,
         (next_point.y * height).round.to_i,
-        StumpyPNG::RGBA::WHITE
+        color
       )
     end
 
     @points.each_value do |point|
       x = (width * point.x).round.to_i
       y = (height * point.y).round.to_i
-      image.circle(x, y, 5, StumpyPNG::RGBA::WHITE, true)
+      image.circle(x, y, 5, color, true)
     end
 
     image

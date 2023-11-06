@@ -61,7 +61,7 @@ class TensorflowLite::Image::ObjectDetection::Output
     @top = top_px.to_f32 / canvas_height
   end
 
-  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil, color = StumpyPNG::RGBA::BLACK) : Canvas
     return image unless @score >= minimum_score
 
     width, height = image.width, image.height
@@ -73,7 +73,8 @@ class TensorflowLite::Image::ObjectDetection::Output
         (point.x * width).round.to_i,
         (point.y * height).round.to_i,
         (next_point.x * width).round.to_i,
-        (next_point.y * height).round.to_i
+        (next_point.y * height).round.to_i,
+        color
       )
     end
 
@@ -82,7 +83,8 @@ class TensorflowLite::Image::ObjectDetection::Output
         (points[0].x * width).round.to_i,
         (points[0].y * height).round.to_i,
         name,
-        font
+        font,
+        color
       )
     end
 

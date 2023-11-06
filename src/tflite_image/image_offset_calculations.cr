@@ -87,12 +87,12 @@ module TensorflowLite::Image
   #
   # if marking up the original image,
   # you'll need to take into account how it was scaled
-  def self.markup(image : Canvas, detections : Array, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+  def self.markup(image : Canvas, detections : Array, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil, color = StumpyPNG::RGBA::BLACK) : Canvas
     detections.each do |detection|
       if detection.responds_to?(:score)
         next if detection.score < minimum_score
       end
-      detection.markup(image, minimum_score, font)
+      detection.markup(image, minimum_score, font, color)
     end
     image
   end

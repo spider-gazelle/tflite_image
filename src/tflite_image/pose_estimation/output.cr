@@ -49,7 +49,7 @@ class TensorflowLite::Image::PoseEstimation::Output
   #
   # if marking up the original image,
   # you'll need to take into account how it was scaled and provide offsets
-  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil) : Canvas
+  def markup(image : Canvas, minimum_score : Float32 = 0.3_f32, font : PCFParser::Font? = nil, color = StumpyPNG::RGBA::WHITE) : Canvas
     width, height = image.width, image.height
 
     @points.each_value do |point|
@@ -57,7 +57,7 @@ class TensorflowLite::Image::PoseEstimation::Output
 
       x = (width * point.x).round.to_i
       y = (height * point.y).round.to_i
-      image.circle(x, y, 5, StumpyPNG::RGBA::WHITE, true)
+      image.circle(x, y, 5, color, true)
     end
 
     LINES.map do |line|
@@ -71,7 +71,7 @@ class TensorflowLite::Image::PoseEstimation::Output
           (point.y * height).round.to_i,
           (next_point.x * width).round.to_i,
           (next_point.y * height).round.to_i,
-          StumpyPNG::RGBA::WHITE
+          color
         )
       end
     end

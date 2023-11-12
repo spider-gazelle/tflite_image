@@ -1,8 +1,10 @@
 require "json"
+require "yaml"
 require "./detection/*"
 
 module TensorflowLite::Image::Detection
   include JSON::Serializable
+  include YAML::Serializable
 
   # i.e. object, pose, face, age, class
   abstract def type : Symbol

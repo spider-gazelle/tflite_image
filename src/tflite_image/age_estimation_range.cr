@@ -8,15 +8,15 @@ class TensorflowLite::Image::AgeEstimationRange
 
   # adjust this for the model you're using
   property ranges = [
-    (0..6),
-    (7..8),
-    (9..11),
-    (12..19),
-    (20..27),
-    (28..35),
-    (36..45),
-    (46..60),
-    (61..75),
+    (0...7),
+    (7...9),
+    (9...12),
+    (12...20),
+    (20...28),
+    (28...36),
+    (36...46),
+    (46...61),
+    (61...75),
   ]
 
   struct Output

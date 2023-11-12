@@ -1,9 +1,11 @@
 require "json"
+require "yaml"
 require "../detection"
 
 module TensorflowLite::Image::Detection
   module Point
     include JSON::Serializable
+    include YAML::Serializable
 
     getter x : Float32
     getter y : Float32

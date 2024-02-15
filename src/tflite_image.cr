@@ -85,6 +85,11 @@ module TensorflowLite::Image
       {input_tensor[2], input_tensor[1]}
     end
 
+    getter aspect_ratio : Float64 do
+      res = resolution
+      res[0] / res[1]
+    end
+
     # scales the image before invoking the tflite model
     def run(canvas : Canvas, scale_mode : Scale = @scaling_mode, resize_method : StumpyResize::InterpolationMethod = :bilinear)
       desired_width, desired_height = resolution

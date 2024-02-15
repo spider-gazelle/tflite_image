@@ -9,10 +9,10 @@ require "tensorflow_lite/edge_tpu"
 
 # is there an Edge TPU available?
 delegate = if TensorflowLite::EdgeTPU.devices.size > 0
-                 edge_tpu = TensorflowLite::EdgeTPU.devices[0]
-                 Log.info { "EdgeTPU Found! #{edge_tpu.type}: #{edge_tpu.path}" }
-                 edge_tpu.to_delegate
-               end
+             edge_tpu = TensorflowLite::EdgeTPU.devices[0]
+             Log.info { "EdgeTPU Found! #{edge_tpu.type}: #{edge_tpu.path}" }
+             edge_tpu.to_delegate
+           end
 
 # init the tensorflow lite library for a TPU
 client = TensorflowLite::Client.new(

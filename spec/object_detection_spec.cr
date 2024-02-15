@@ -62,5 +62,71 @@ module TensorflowLite::Image
 
       detections[0].label.should eq "potted plant"
     end
+
+    it "can adjust bounding boxes to fit a particular aspect ratio" do
+      # matching aspect ratio
+      detection = ObjectDetection::Output.new(top: 0.0, left: 0.0, bottom: 0.03, right: 0.03, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(4 / 4, 100, 100)
+      position[:top].should eq 0
+      position[:left].should eq 0
+      position[:bottom].should eq 3
+      position[:right].should eq 3
+
+      # aspect ratio less than target, against edge
+      detection = ObjectDetection::Output.new(top: 0.0, left: 0.0, bottom: 0.06, right: 0.06, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(4 / 3, 100, 100)
+      position[:top].should eq 0
+      position[:left].should eq 0
+      position[:bottom].should eq 6
+      position[:right].should eq 8
+
+      # aspect ratio less than target, centered
+      detection = ObjectDetection::Output.new(top: 0.02, left: 0.02, bottom: 0.08, right: 0.08, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(4 / 3, 100, 100)
+      position[:top].should eq 2
+      position[:left].should eq 1
+      position[:bottom].should eq 8
+      position[:right].should eq 9
+
+      # aspect ratio less than target, far edge
+      detection = ObjectDetection::Output.new(top: 0.94, left: 0.94, bottom: 1.0, right: 1.0, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(4 / 3, 100, 100)
+      position[:top].should eq 94
+      position[:left].should eq 92
+      position[:bottom].should eq 100
+      position[:right].should eq 100
+
+      # aspect ratio cannot be matched
+      detection = ObjectDetection::Output.new(top: 1.0, left: 1.0, bottom: 1.0, right: 1.0, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(4 / 3, 100, 100)
+      position[:top].should eq 100
+      position[:left].should eq 100
+      position[:bottom].should eq 100
+      position[:right].should eq 100
+
+      # aspect ratio greater than target, against edge
+      detection = ObjectDetection::Output.new(top: 0.0, left: 0.0, bottom: 0.06, right: 0.06, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(3 / 4, 100, 100)
+      position[:top].should eq 0
+      position[:left].should eq 0
+      position[:bottom].should eq 8
+      position[:right].should eq 6
+
+      # aspect ratio greater than target, centered
+      detection = ObjectDetection::Output.new(top: 0.02, left: 0.02, bottom: 0.08, right: 0.08, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(3 / 4, 100, 100)
+      position[:top].should eq 1
+      position[:left].should eq 2
+      position[:bottom].should eq 9
+      position[:right].should eq 8
+
+      # aspect ratio greater than target, far edge
+      detection = ObjectDetection::Output.new(top: 0.94, left: 0.94, bottom: 1.0, right: 1.0, score: 0.0, index: 1)
+      position = detection.adjust_bounding_box(3 / 4, 100, 100)
+      position[:top].should eq 92
+      position[:left].should eq 94
+      position[:bottom].should eq 100
+      position[:right].should eq 100
+    end
   end
 end

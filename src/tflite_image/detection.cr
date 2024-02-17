@@ -10,7 +10,7 @@ module TensorflowLite::Image::Detection
   abstract def type : Symbol
   abstract def label : String?
 
-  getter associated : Array(Detection) { [] of Detection }
+  property associated : Array(Detection) { [] of Detection }
 
   # :nodoc:
   def adjust(canvas_width : Int, canvas_height : Int, offset_left : Int, offset_top : Int)

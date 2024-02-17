@@ -99,17 +99,17 @@ module TensorflowLite::Image::Detection::BoundingBox
     end
 
     # Apply adjustments
-    new_left = {left + left_adjustment, 0_f32}.max
-    new_right = {right + right_adjustment, 1_f32}.min
-    new_top = {top + top_adjustment, 0_f32}.max
-    new_bottom = {bottom + bottom_adjustment, 1_f32}.min
+    new_left = ({left + left_adjustment, 0_f32}.max * image_width).to_i
+    new_right = ({right + right_adjustment, 1_f32}.min * image_width).to_i
+    new_top = ({top + top_adjustment, 0_f32}.max * image_height).to_i
+    new_bottom = ({bottom + bottom_adjustment, 1_f32}.min * image_height).to_i
 
     # Convert percentage to pixel coordinates
     {
-      top:    (new_top * image_height).to_i,
-      left:   (new_left * image_width).to_i,
-      bottom: (new_bottom * image_height).to_i,
-      right:  (new_right * image_width).to_i,
+      top:    {new_top, new_bottom}.min,
+      left:   {new_left, new_right}.min,
+      bottom: {new_top, new_bottom}.max,
+      right:  {new_left, new_right}.max,
     }
   end
 end

@@ -48,10 +48,6 @@ class TensorflowLite::Image::FaceDetection::Output
     @points.transform_values &.as(Detection::Point)
   end
 
-  def area : Float32
-    (@right - @left) * (@top - @bottom)
-  end
-
   # adjust the detections so they can be applied directly to the source image
   def adjust(canvas_width : Int, canvas_height : Int, offset_left : Int, offset_top : Int)
     return if offset_left.zero? && offset_top.zero?

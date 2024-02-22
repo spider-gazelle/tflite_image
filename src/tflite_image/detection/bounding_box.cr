@@ -12,17 +12,32 @@ module TensorflowLite::Image::Detection::BoundingBox
 
   abstract def boundary : Detection::Line
 
+  # Calculate the area
+  @[JSON::Field(ignore: true)]
+  @[YAML::Field(ignore: true)]
+  getter area : Float32 do
+    width * height
+  end
+
   # Calculate width and height in percentage
   @[JSON::Field(ignore: true)]
   @[YAML::Field(ignore: true)]
   getter width : Float32 do
-    right - left
+    if right >= left
+      right - left
+    else
+      left - right
+    end
   end
 
   @[JSON::Field(ignore: true)]
   @[YAML::Field(ignore: true)]
   getter height : Float32 do
-    bottom - top
+    if bottom >= top
+      bottom - top
+    else
+      top - bottom
+    end
   end
 
   # Calculate current aspect ratio

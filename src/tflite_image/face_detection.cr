@@ -107,15 +107,13 @@ class TensorflowLite::Image::FaceDetection
   end
 
   def intersection_over_union(det1 : Output, det2 : Output) : Float32
-    x_a = [det1.left, det2.left].max
-    y_a = [det1.bottom, det2.bottom].max
-    x_b = [det1.right, det2.right].min
-    y_b = [det1.top, det2.top].min
+    x_a = {det1.left, det2.left}.max
+    y_a = {det1.top, det2.top}.max
+    x_b = {det1.right, det2.right}.min
+    y_b = {det1.bottom, det2.bottom}.min
 
-    inter_area = [x_b - x_a, 0.0_f32].max * [y_b - y_a, 0.0_f32].max
-
-    iou = inter_area / (det1.area + det2.area - inter_area)
-    iou
+    inter_area = {0_f32, x_b - x_a}.max * {0_f32, y_b - y_a}.max
+    inter_area / (det1.area + det2.area - inter_area)
   end
 
   def non_maximum_suppression(detections : Array(Output), iou_threshold : Float32) : Array(Output)
@@ -131,7 +129,7 @@ class TensorflowLite::Image::FaceDetection
       result << det
 
       sorted_detections.each_with_index do |other_det, j|
-        next if suppressed[j]
+        next if i == j || suppressed[j]
 
         if intersection_over_union(det, other_det) > iou_threshold
           suppressed[j] = true

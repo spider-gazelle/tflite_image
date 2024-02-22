@@ -86,9 +86,9 @@ class TensorflowLite::Image::FaceDetection
       end
 
       detections << Output.new(
-        top: ymax,
+        top: ymin,
         left: xmin,
-        bottom: ymin,
+        bottom: ymax,
         right: xmax,
         score: probability,
         index: index,
